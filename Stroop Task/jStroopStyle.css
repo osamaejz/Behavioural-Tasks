@@ -1,0 +1,23 @@
+#stroop {
+  display: block;
+  width: 400px;
+  height: 100vh;
+  margin: 0 auto;
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  font-family: sans-serif;
+  font-size: 200%;
+}
+
+#key {
+  color: #dbdbdb;
+  text-align: center;
+  font-family: sans-serif;
+  font-size: 150%;
+}
+
+#key span {
+  display: inline-block;
+  margin: 0 24px;
+}
