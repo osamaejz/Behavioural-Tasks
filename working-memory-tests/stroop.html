@@ -1,0 +1,138 @@
+<html>
+  <head>
+    <title>WM Digit Span</title>
+    <script src="../assets/js/js.cookie-2.2.1.min.js" type="text/javascript"></script>
+    <script src="jspsych-6.0.4/jspsych.js"></script>
+    <script src="jspsych-6.0.4/plugins/jspsych-html-keyboard-response.js"></script>
+    <script src="jspsych-6.0.4/plugins/jspsych-digit-span-recall.js"></script>
+    <script src="jspsych-6.0.4/plugins/jspsych-survey-text.js"></script>
+    <script src="jspsych-6.0.4/plugins/jspsych-instructions.js"></script>
+    <script src="jspsych-6.0.4/plugins/jspsych-fullscreen.js"></script>
+    <script src="jspsych-6.0.4/plugins/jspsych-single-stim.js"></script>
+    <script src="jspsych-6.0.4/plugins/jspsych-text.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js"></script>
+    <link href="jspsych-6.0.4/css/jspsych_digitspan.css" rel="stylesheet" type="text/css"></link>
+  </head>
+  <body><div id="jspsych-target"></div></body>
+  <script>
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+var csrftoken = getCookie('csrftoken');
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+
+var timeline = [];
+
+
+var trials = [
+    {
+        stimulus: "<p style='font-size: 50px; color: red;'>SHIP</p>",
+        data: {word: 'SHIP', color: 'red', stimulus_type: 'unrelated', correct_response: 'R'}
+    },
+    {
+        stimulus: "<p style='font-size: 50px; color: green;'>MONKEY</p>",
+        data: {word: 'MONKEY', color: 'green', stimulus_type: 'unrelated', correct_response: 'G'}
+    },
+    {
+        stimulus: "<p style='font-size: 50px; color: blue;'>ZAMBONI</p>",
+        data: {word: 'ZAMBONI', color: 'blue', stimulus_type: 'unrelated', correct_response: 'B'}
+    },
+    {
+        stimulus: "<p style='font-size: 50px; color: red;'>RED</p>",
+        data: {word: 'RED', color: 'red', stimulus_type: 'congruent', correct_response: 'R'}
+    },
+    {
+        stimulus: "<p style='font-size: 50px; color: green;'>GREEN</p>",
+        data: {word: 'GREEN', color: 'green', stimulus_type: 'congruent', correct_response: 'G'}
+    },
+    {
+        stimulus: "<p style='font-size: 50px; color: blue;'>BLUE</p>",
+        data: {word: 'BLUE', color: 'blue', stimulus_type: 'congruent', correct_response: 'B'}
+    },
+    {
+        stimulus: "<p style='font-size: 50px; color: red;'>GREEN</p>",
+        data: {word: 'GREEN', color: 'red', stimulus_type: 'incongruent', correct_response: 'R'}
+    },
+    {
+        stimulus: "<p style='font-size: 50px; color: green;'>BLUE</p>",
+        data: {word: 'BLUE', color: 'green', stimulus_type: 'incongruent', correct_response: 'G'}
+    },
+    {
+        stimulus: "<p style='font-size: 50px; color: blue;'>RED</p>",
+        data: {word: 'RED', color: 'blue', stimulus_type: 'incongruent', correct_response: 'B'}
+    }
+];
+
+
+var word = {
+    type: 'single-stim',
+    stimulus: jsPsych.timelineVariable('stimulus'),
+    choices: ['r','g', 'b'],
+    is_html: true,
+    data: jsPsych.timelineVariable('data'),
+    on_finish: function(d){
+        d.correct = d.key_press == d.correct_response.charCodeAt(0);
+    }
+};
+
+var test_procedure = {
+    timeline: [word],
+    timeline_variables: trials,
+    randomize_order: true
+};
+
+timeline.push(test_procedure);
+
+/* we can retrieve the data within the experiment and use it to present a summary to the participant*/
+var summary = {
+    type: 'single-stim',
+    stimulus: function(){
+        /* lets get the average rt for congruent trials*/
+        /* the syntax here is similar to pandas or dplyr!*/
+        var congruent_rt = jsPsych.data.get().filter({stimulus_type: 'congruent'}).select('rt').mean();
+        /* challenge 1 : get avg rt for incongruent and unrelated trials*/
+        var incongruent_rt = 0;
+        var unrelated_rt = 0;
+        /* challenge 2 : get percent correct for each type of trial*/
+        var congruent_pct = 0;
+        var incongruent_pct = 0;
+        var unrelated_pct = 0;
+        return '<p>Your average response time on congruent trials was '+Math.round(congruent_rt)+'ms. '+
+            'Your average response time on incongruent trials was '+Math.round(incongruent_rt)+'ms. '+
+            'Your average response time on unrelated trials was '+Math.round(unrelated_rt)+'ms.</p>'+
+            '<p>Your average percent correct on congruent trials was '+Math.round(congruent_pct)+'%. '+
+            'Your average percent correct on incongruent trials was '+Math.round(incongruent_pct)+'%. '+
+            'Your average percent correct on unrelated trials was '+Math.round(unrelated_pct)+'%.</p>'+
+            '<p>Thanks for participating! Press "q" to finish the experiment.</p>';
+    },
+    choices: ['q'],
+    is_html: true
+};
+timeline.push(summary);
+
+jsPsych.init({
+    display_element: 'jspsych-target',
+    timeline: timeline
+});
+
+
+
+</script>
+</html>
